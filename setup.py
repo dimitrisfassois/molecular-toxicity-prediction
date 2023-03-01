@@ -4,7 +4,7 @@ from setuptools import setup
 REQUIRED_PACKAGES = []
 
 setup(
-  name='my-package',
+  name='molecular-toxicity-prediction',
   version='0.1',
   author='Demetrios Fassois',
   install_requires=REQUIRED_PACKAGES,
