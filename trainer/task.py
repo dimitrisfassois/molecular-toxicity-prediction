@@ -8,15 +8,17 @@ import deepchem as dc
 
 from util.constants import CONST
 from data_loaders.data_loaders_utils import get_generator
+from models.callbacks import ValidationCallback
 from .model_training import get_model
 from .model_evaluation import evaluate_model
 
 
 def run_experiment(flags):
     """Testbed for running model training and evaluation."""
-    logging.info("Loading data for training and evaluation.")
+    logging.info("Loading training, validation and test datasets.")
     train_dataset = dc.data.DiskDataset(flags.train_data_dir)
     val_dataset = dc.data.DiskDataset(flags.val_data_dir)
+    test_dataset = dc.data.DiskDataset(flags.test_data_dir)
 
     logging.info(f"Initializing model: {flags.model_type}")
     n_tasks = len(CONST.TASKS)
@@ -26,19 +28,34 @@ def run_experiment(flags):
     train_generator = get_generator(
         flags.model_type, train_dataset, flags.batch_size, flags.n_epochs, n_tasks
     )
-    avg_loss = dc_model.fit_generator(train_generator)
+    metric = dc.metrics.Metric(dc.metrics.roc_auc_score)
+    logging.info(f"Setting up early stopping in the {flags.save_dir} directory")
+    callback = ValidationCallback(
+        val_dataset,
+        100,
+        metric,
+        n_tasks,
+        flags.model_type,
+        flags.batch_size,
+        save_dir=flags.save_dir,
+    )
+
+    avg_loss = dc_model.fit_generator(train_generator, callbacks=callback)
     logging.info(f"Average loss over the most recent checkpoint interval: {avg_loss}")
 
-    logging.info("Evaluating model on eval dataset.")
-    val_generator = get_generator(
+    logging.info("Loading model with best validation loss.")
+    dc_model.restore(model_dir=flags.save_dir)
+
+    logging.info("Evaluating model on test dataset.")
+    test_generator = get_generator(
         flags.model_type,
-        val_dataset,
+        test_dataset,
         flags.batch_size,
         1,
         n_tasks,
         deterministic=True,
     )
-    evaluate_model(dc_model, val_generator, val_dataset)
+    evaluate_model(dc_model, test_generator, test_dataset)
 
 
 def _parse_args():
@@ -72,8 +89,21 @@ def _parse_args():
     )
 
     parser.add_argument(
+        "--test_data_dir",
+        help="""Location of test data.
+            """,
+        required=True,
+    )
+
+    parser.add_argument(
         "--model_dir",
         help="Output directory for saving model checkpoints.",
+        required=True,
+    )
+
+    parser.add_argument(
+        "--save_dir",
+        help="Directory for early stopping for saving model with best validation loss.",
         required=True,
     )
 
