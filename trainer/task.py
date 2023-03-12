@@ -34,7 +34,7 @@ def run_experiment(flags):
         flags.model_type,
         val_dataset,
         flags.batch_size,
-        flags.n_epochs,
+        1,
         n_tasks,
         deterministic=True,
     )
