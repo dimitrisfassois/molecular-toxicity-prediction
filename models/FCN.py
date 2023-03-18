@@ -6,16 +6,16 @@ from collections.abc import Sequence as SequenceCollection
 class FCN(tf.keras.Model):
     def __init__(
         self,
-        n_tasks: int,
-        n_features: int,
-        layer_sizes: SequenceCollection[int] = [1000],
-        weight_init_stddevs: OneOrMany[float] = 0.02,
-        bias_init_consts: OneOrMany[float] = 1.0,
-        weight_decay_penalty: float = 0.0,
-        weight_decay_penalty_type: str = "l2",
-        dropouts: OneOrMany[float] = 0.5,
-        activation_fns: OneOrMany[ActivationFn] = "relu",
-        residual: bool = False,
+        n_tasks,
+        n_features,
+        layer_sizes=[1000],
+        weight_init_stddevs=0.02,
+        bias_init_consts=1.0,
+        weight_decay_penalty=0.0,
+        weight_decay_penalty_type="l2",
+        dropouts=0.5,
+        activation_fns="relu",
+        residual=False,
         **kwargs
     ) -> None:
         super(FCN, self).__init__()
