@@ -14,13 +14,14 @@ def get_loss():
     return loss, metric
 
 
-def get_model(model_type, n_tasks, batch_size, model_dir):
+def get_model(model_type, n_tasks, batch_size, model_dir, learning_rate):
     """
 
     :param model_type:
     :param n_tasks:
     :param batch_size:
     :param model_dir:
+    :param learning_rate:
     :return:
     """
     assert model_type in (
@@ -33,14 +34,14 @@ def get_model(model_type, n_tasks, batch_size, model_dir):
     if model_type == "multi_headed_attention":
         n_features = 1792
         model = MultiHeadedAttentionModel(n_tasks, n_features)
-        dc_model = dc.models.KerasModel(model=model, loss=loss, model_dir=model_dir)
+        dc_model = dc.models.KerasModel(model=model, loss=loss, model_dir=model_dir, learning_rate=learning_rate)
     elif model_type == "self_attention":
         n_features = 1792
         model = SelfAttentionModel(n_tasks, n_features, batch_size)
-        dc_model = dc.models.KerasModel(model=model, loss=loss, model_dir=model_dir)
+        dc_model = dc.models.KerasModel(model=model, loss=loss, model_dir=model_dir, learning_rate=learning_rate)
     elif model_type == "multi_task_classifier":
         n_features = 1024
         dc_model = dc.models.MultitaskClassifier(
-            n_tasks=n_tasks, n_features=n_features, layer_sizes=[1000], model_dir=model_dir
+            n_tasks=n_tasks, n_features=n_features, layer_sizes=[1000], model_dir=model_dir, learning_rate=learning_rate
         )
     return dc_model

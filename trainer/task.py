@@ -22,7 +22,8 @@ def run_experiment(flags):
 
     logging.info(f"Initializing model: {flags.model_type}")
     n_tasks = len(CONST.TASKS)
-    dc_model = get_model(flags.model_type, n_tasks, flags.batch_size, flags.model_dir)
+    learning_rate = dc.models.optimizers.ExponentialDecay(flags.lr, 0.9, 1000)
+    dc_model = get_model(flags.model_type, n_tasks, flags.batch_size, flags.model_dir, learning_rate)
 
     logging.info(f"Starting model training for {flags.n_epochs} epochs.")
     train_generator = get_generator(
@@ -132,6 +133,13 @@ def _parse_args():
         help="Maximum number of epochs for which to train the model.",
         type=int,
         default=2,
+    )
+
+    parser.add_argument(
+        "--lr",
+        help="Starting point for learning rate to use in scheduler.",
+        type=float,
+        default=0.0002,
     )
 
     return parser.parse_args()
