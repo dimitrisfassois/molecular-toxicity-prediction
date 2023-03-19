@@ -65,6 +65,12 @@ def _parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
+        '--job-dir',
+        help='GCS location to write checkpoints and export models',
+        required=True
+    )
+
+    parser.add_argument(
         "--model_type",
         help="Type of model to use.",
         choices=[
