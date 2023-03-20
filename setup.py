@@ -1,8 +1,7 @@
 from setuptools import find_packages
 from setuptools import setup
 
-REQUIRED_PACKAGES = []
-REQUIRED_PACKAGES = ['tensorflow-addons==0.19.0', 'torch==1.11.0', 'dgl', 'deepchem']
+REQUIRED_PACKAGES = ['tensorflow-addons==0.19.0', 'torch==1.11.0', 'dgl', 'deepchem', 'fsspec', 'gcsfs']
 
 setup(
   name='molecular-toxicity-prediction',
