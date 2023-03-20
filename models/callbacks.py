@@ -34,7 +34,7 @@ class ValidationCallback(object):
                  output_file=sys.stdout,
                  save_dir=None,
                  save_metric=0,
-                 save_on_minimum=True,
+                 save_on_minimum=False,
                  transformers=[]):
         """Create a ValidationCallback.
         Parameters
