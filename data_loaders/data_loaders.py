@@ -2,6 +2,19 @@
 import numpy as np
 from deepchem.feat.mol_graphs import ConvMol
 from deepchem.metrics import to_one_hot
+import deepchem as dc
+
+from util.constants import CONST
+
+def get_disk_dataset(fs, data_dir):
+    return dc.data.datasets.DiskDataset.from_numpy(
+        X=np.load(fs.open(f"{data_dir}/shard-0-X.npy"), allow_pickle=True),
+        y=np.load(fs.open(f"{data_dir}/shard-0-y.npy"), allow_pickle=True),
+        w=np.load(fs.open(f"{data_dir}/shard-0-w.npy"), allow_pickle=True),
+        ids=np.load(fs.open(f"{data_dir}/shard-0-ids.npy"), allow_pickle=True),
+        tasks=CONST.TASKS
+    )
+
 
 
 def full_dataset_generator(dataset, batch_size, n_epochs, n_tasks, deterministic):
