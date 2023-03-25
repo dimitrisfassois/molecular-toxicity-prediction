@@ -25,15 +25,15 @@ class SelfAttentionModel(tf.keras.Model):
 
 
 class MultiHeadedAttentionModel(tf.keras.Model):
-    def __init__(self, n_tasks, n_features):
+    def __init__(self, n_tasks, n_features, batch_size):
         super(MultiHeadedAttentionModel, self).__init__(n_tasks)
         self.n_tasks = n_tasks
         self.fcn = FCN(n_tasks=12, n_features=n_features, layer_sizes=[1000])
-        self.graph_model = MyGraphConvModel()
-        self.mha = tf.keras.layers.MultiHeadAttention(num_heads=2, key_dim=512)
+        self.graph_model = GraphConvModel(batch_size=batch_size)
+        self.mha = tf.keras.layers.MultiHeadAttention(num_heads=2, key_dim=64)
         self.add = tf.keras.layers.Add()
         self.layernorm = tf.keras.layers.LayerNormalization()
-        self.ffn = FeedForward()
+        self.ffn = FCN(n_tasks=n_tasks, n_features=n_features)
         self.output_layer = layers.Dense(n_tasks*2)
         self.logits = layers.Reshape((n_tasks, 2))
         self.softmax = layers.Softmax()
