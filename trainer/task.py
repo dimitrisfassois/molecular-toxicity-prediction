@@ -3,8 +3,8 @@ import argparse
 import logging
 import fsspec
 
-import numpy as np
 import deepchem as dc
+import torch
 
 from util.constants import CONST
 from data_loaders.data_loaders_utils import get_generator
@@ -22,17 +22,6 @@ def run_experiment(flags):
     train_dataset = get_disk_dataset(fs, flags.train_data_dir)
     val_dataset = get_disk_dataset(fs, flags.val_data_dir)
     test_dataset = get_disk_dataset(fs, flags.test_data_dir)
-    """
-    train_dataset = dc.data.datasets.DiskDataset.from_numpy(
-        X=np.load(fs.open(f"{flags.train_data_dir}/shard-0-X.npy"), allow_pickle=True),
-        y=np.load(fs.open(f"{flags.train_data_dir}/shard-0-y.npy"), allow_pickle=True),
-        w=np.load(fs.open(f"{flags.train_data_dir}/shard-0-w.npy"), allow_pickle=True),
-        ids=np.load(fs.open(f"{flags.train_data_dir}/shard-0-ids.npy"), allow_pickle=True),
-        tasks=CONST.TASKS
-    )
-    train_dataset = dc.data.DiskDataset(flags.train_data_dir)
-    val_dataset = dc.data.DiskDataset(flags.val_data_dir)
-    test_dataset = dc.data.DiskDataset(flags.test_data_dir)"""
 
     logging.info(f"Initializing model: {flags.model_type}")
     n_tasks = len(CONST.TASKS)
@@ -60,6 +49,17 @@ def run_experiment(flags):
 
     logging.info("Loading model with best validation loss.")
     dc_model.restore(model_dir=flags.save_dir)
+
+    logging.info(f"Checkpoint restored from:, {dc_model.get_checkpoints(flags.save_dir)}")
+    
+    if flags.model_type == "multi_task_classifier":
+        data = {
+            'model_state_dict': dc_model.model.state_dict(),
+            'optimizer_state_dict': dc_model._pytorch_optimizer.state_dict(),
+            'global_step': dc_model._global_step
+        }
+        with fs.open(flags.save_dir, mode='wb') as f:
+            torch.save(data, f)
 
     logging.info("Evaluating model on test dataset.")
     test_generator = get_generator(

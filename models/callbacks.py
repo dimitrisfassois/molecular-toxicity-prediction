@@ -131,7 +131,7 @@ class ValidationCallback(object):
         if self._best_score is None or score < self._best_score:
             self._best_score = score
             if self.save_dir is not None:
-                model.save_checkpoint(model_dir=self.save_dir)
+                model.save_checkpoint(model_dir=self.save_dir,  max_checkpoints_to_keep=30)
         if model.wandb_logger is not None:
             # Log data to Wandb
             data = {'eval/' + k: v for k, v in scores.items()}
