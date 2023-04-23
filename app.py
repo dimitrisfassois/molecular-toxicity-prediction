@@ -43,7 +43,7 @@ explainer = lime_tabular.LimeTabularExplainer(test_dataset.X[:, :n_features],
 def eval_model(dc_model, task_no, n_tasks):
     def eval_closure(x):
         ds = dc.data.NumpyDataset(x, n_tasks=n_tasks)
-        predictions = dc_model.predict(ds)[:,task_no]
+        predictions = dc_model.predict(ds)[:, task_no]
         return predictions
     return eval_closure
 
@@ -79,11 +79,7 @@ app.layout = html.Div([
     html.Label('Select a toxicity test:'),
     dcc.Dropdown(
         id='task-dropdown',
-        options=[
-            {'label': 'NR-AR', 'value': 0},
-            {'label': 'NR-AR-LBD', 'value': 1},
-            {'label': 'NR-AhR', 'value': 2}
-        ],
+        options=[{k: v  for k, v in zip(('label', 'value'), [CONST.TASKS[i], i])} for i in range(n_tasks)],
         value=None
     ),
     html.Br(),
@@ -108,8 +104,13 @@ app.layout = html.Div([
 @app.callback([Output('row-dropdown', 'options'), Output('row-dropdown', 'value')],
               Input('task-dropdown', 'value'))
 def update_svg_dropdowns(first_dropdown_value):
-    options_vals = list(np.where(test_dataset.y[:, first_dropdown_value] == 1)[0])
-    options = [{'label': i, 'value': i} for i in options_vals]
+    options = []
+    if first_dropdown_value:
+        ds = dc.data.NumpyDataset(test_dataset.X[:, :n_features].astype(float), n_tasks=n_tasks)
+        preds = dc_model.predict(ds)[:, first_dropdown_value, 1]
+        options_vals = list(np.where((test_dataset.y[:, first_dropdown_value] == 1) * (preds > 0.5))[0])
+        # options_vals = list(np.where(test_dataset.y[:, first_dropdown_value] == 1)[0])
+        options = [{'label': i, 'value': i} for i in options_vals]
     return options, None
 
 
