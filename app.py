@@ -13,6 +13,7 @@ from lime import lime_tabular
 from rdkit import Chem
 
 from util.constants import CONST
+from data_loaders.data_loaders import get_disk_dataset
 
 app = dash.Dash(__name__)
 
@@ -29,7 +30,11 @@ with fs.open(checkpoint, mode='rb') as f:
 dc_model.model.load_state_dict(data['model_state_dict'])
 
 # Load the test dataset
-test_dataset = dc.data.DiskDataset('/Users/demetriosfassois/Documents/Columbia/EECSE6895/Project/data/test_dataset')
+project_id = "molecular-toxicity-prediction"
+fs = fsspec.filesystem('gs', project=project_id)
+test_data_dir = "gs://molecular-toxicity-prediction/data/test_dataset"
+test_dataset = get_disk_dataset(fs, test_data_dir)
+# test_dataset = dc.data.DiskDataset('/Users/demetriosfassois/Documents/Columbia/EECSE6895/Project/data/test_dataset')
 
 # Set up Lime
 feature_names = ["fp_%s" % x for x in range(n_features)]
@@ -109,7 +114,6 @@ def update_svg_dropdowns(first_dropdown_value):
         ds = dc.data.NumpyDataset(test_dataset.X[:, :n_features].astype(float), n_tasks=n_tasks)
         preds = dc_model.predict(ds)[:, first_dropdown_value, 1]
         options_vals = list(np.where((test_dataset.y[:, first_dropdown_value] == 1) * (preds > 0.5))[0])
-        # options_vals = list(np.where(test_dataset.y[:, first_dropdown_value] == 1)[0])
         options = [{'label': i, 'value': i} for i in options_vals]
     return options, None
 
