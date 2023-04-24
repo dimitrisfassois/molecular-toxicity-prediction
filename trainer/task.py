@@ -18,7 +18,7 @@ def run_experiment(flags):
     """Testbed for running model training and evaluation."""
     logging.info("Loading training, validation and test datasets.")
     project_id = "molecular-toxicity-prediction"
-    fs = fsspec.filesystem('gs', project=project_id)
+    fs = fsspec.filesystem("gs", project=project_id)
     train_dataset = get_disk_dataset(fs, flags.train_data_dir)
     val_dataset = get_disk_dataset(fs, flags.val_data_dir)
     test_dataset = get_disk_dataset(fs, flags.test_data_dir)
@@ -26,7 +26,15 @@ def run_experiment(flags):
     logging.info(f"Initializing model: {flags.model_type}")
     n_tasks = len(CONST.TASKS)
     learning_rate = dc.models.optimizers.ExponentialDecay(flags.lr, 0.9, 1000)
-    dc_model = get_model(flags.model_type, n_tasks, flags.batch_size, flags.model_dir, learning_rate)
+    dc_model = get_model(
+        flags.model_type,
+        n_tasks,
+        flags.batch_size,
+        flags.model_dir,
+        learning_rate,
+        flags.num_heads,
+        flags.key_dim,
+    )
 
     logging.info(f"Starting model training for {flags.n_epochs} epochs.")
     train_generator = get_generator(
@@ -50,15 +58,17 @@ def run_experiment(flags):
     logging.info("Loading model with best validation loss.")
     dc_model.restore(model_dir=flags.save_dir)
 
-    logging.info(f"Checkpoint restored from:, {dc_model.get_checkpoints(flags.save_dir)}")
-    
+    logging.info(
+        f"Checkpoint restored from:, {dc_model.get_checkpoints(flags.save_dir)}"
+    )
+
     if flags.model_type == "multi_task_classifier":
         data = {
-            'model_state_dict': dc_model.model.state_dict(),
-            'optimizer_state_dict': dc_model._pytorch_optimizer.state_dict(),
-            'global_step': dc_model._global_step
+            "model_state_dict": dc_model.model.state_dict(),
+            "optimizer_state_dict": dc_model._pytorch_optimizer.state_dict(),
+            "global_step": dc_model._global_step,
         }
-        with fs.open(flags.save_dir, mode='wb') as f:
+        with fs.open(flags.save_dir, mode="wb") as f:
             torch.save(data, f)
 
     logging.info("Evaluating model on test dataset.")
@@ -79,9 +89,9 @@ def _parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--job-dir',
-        help='GCS location to write checkpoints and export models',
-        required=True
+        "--job-dir",
+        help="GCS location to write checkpoints and export models",
+        required=True,
     )
 
     parser.add_argument(
@@ -160,6 +170,20 @@ def _parse_args():
         help="Starting point for learning rate to use in scheduler.",
         type=float,
         default=0.0002,
+    )
+
+    parser.add_argument(
+        "--num_heads",
+        help="Number of heads for the multi-headed attention model.",
+        type=float,
+        default=2,
+    )
+
+    parser.add_argument(
+        "--key_dim",
+        help="Dimensiolality of heads for the multi-headed attention model.",
+        type=float,
+        default=128,
     )
 
     return parser.parse_args()

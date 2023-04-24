@@ -14,7 +14,7 @@ def get_loss():
     return loss, metric
 
 
-def get_model(model_type, n_tasks, batch_size, model_dir, learning_rate):
+def get_model(model_type, n_tasks, batch_size, model_dir, learning_rate, num_heads, key_dim):
     """
 
     :param model_type:
@@ -33,7 +33,7 @@ def get_model(model_type, n_tasks, batch_size, model_dir, learning_rate):
     loss, metric = get_loss()
     if model_type == "multi_headed_attention":
         n_features = 1792
-        model = MultiHeadedAttentionModel(n_tasks, n_features, batch_size)
+        model = MultiHeadedAttentionModel(n_tasks, n_features, batch_size, num_heads, key_dim)
         dc_model = dc.models.KerasModel(model=model, loss=loss, model_dir=model_dir, learning_rate=learning_rate)
     elif model_type == "self_attention":
         n_features = 1792
