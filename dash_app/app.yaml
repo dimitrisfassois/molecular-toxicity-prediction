@@ -1,0 +1,10 @@
+runtime: python38
+
+entrypoint: gunicorn -b :$PORT main:app
+
+handlers:
+- url: /.*
+  script: auto
+
+beta_settings:
+  image: gcr.io/molecular-toxicity-prediction/dash_app:v2
