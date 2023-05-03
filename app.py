@@ -12,8 +12,8 @@ import torch
 from lime import lime_tabular
 from rdkit import Chem
 
-from .util.constants import CONST
-from .data_loaders.data_loaders import get_disk_dataset
+from util.constants import CONST
+from data_loaders.data_loaders import get_disk_dataset
 
 app = dash.Dash(__name__)
 # Expose Flask instance
