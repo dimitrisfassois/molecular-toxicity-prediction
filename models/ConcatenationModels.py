@@ -30,7 +30,7 @@ class MultiHeadedAttentionModel(tf.keras.Model):
         self.n_tasks = n_tasks
         self.fcn = FCN(n_tasks=12, n_features=n_features, layer_sizes=[1000])
         self.graph_model = GraphConvModel(batch_size=batch_size)
-        self.mha = tf.keras.layers.MultiHeadAttention(num_heads=num_heads, key_dim=key_dim)
+        self.mha = tf.keras.layers.MultiHeadAttention(num_heads=int(num_heads), key_dim=int(key_dim))
         self.add = tf.keras.layers.Add()
         self.layernorm = tf.keras.layers.LayerNormalization()
         self.ffn = FCN(n_tasks=n_tasks, n_features=n_features)
