@@ -12,8 +12,11 @@ ADD requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && pip install --no-cache-dir gunicorn
 RUN apt-get update && apt-get install -y libxrender1
 RUN apt-get update && \
-    apt-get install -y libxext6 && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y libxext6
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gunicorn \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -r app && useradd -r -g app app
 

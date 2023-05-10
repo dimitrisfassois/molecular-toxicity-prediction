@@ -36,7 +36,6 @@ project_id = "molecular-toxicity-prediction"
 fs = fsspec.filesystem('gs', project=project_id)
 test_data_dir = "gs://molecular-toxicity-prediction/data/test_dataset"
 test_dataset = get_disk_dataset(fs, test_data_dir)
-# test_dataset = dc.data.DiskDataset('/Users/demetriosfassois/Documents/Columbia/EECSE6895/Project/data/test_dataset')
 
 # Set up Lime
 feature_names = ["fp_%s" % x for x in range(n_features)]
