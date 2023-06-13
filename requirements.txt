@@ -1,11 +1,7 @@
+tensorflow
 tensorflow-addons==0.19.0
 torch==1.11.0
 dgl
 deepchem
 fsspec
 gcsfs
-dash
-dash-core-components
-dash-html-components
-dash-renderer
-lime

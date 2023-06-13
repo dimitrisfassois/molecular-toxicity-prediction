@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: molecular-toxicity-prediction-pipeline-
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2023-05-27T19:01:43.261655',
+    pipelines.kubeflow.org/pipeline_spec: '{"description": "Automated training pipeline.",
+      "name": "Molecular Toxicity Prediction Pipeline"}'}
+  labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22}
+spec:
+  entrypoint: molecular-toxicity-prediction-pipeline
+  templates:
+  - name: model-training
+    container:
+      args: []
+      command: [python, kubeflow-pipeline/model_training.py]
+      image: gcr.io/molecular-toxicity-prediction/kubeflow_pipeline:v4
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+  - name: molecular-toxicity-prediction-pipeline
+    dag:
+      tasks:
+      - {name: model-training, template: model-training}
+  arguments:
+    parameters: []
+  serviceAccountName: pipeline-runner
